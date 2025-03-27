@@ -97,7 +97,7 @@ nState = size(xSoln,1);
 quadTol = 1e-10;   %Compute quadrature to this tolerance  
 soln.info.error = zeros(nState,nSegment);
 for i=1:nSegment
-    disp(i)
+    disp(i)    
     soln.info.error(:,i) = rombergQuadrature(absColErr,tSoln([i,i+1]),quadTol);
 end
 soln.info.maxError = max(max(soln.info.error));
@@ -219,7 +219,16 @@ x(:,outOfBounds) = nan;
 
 % Check for any points that are exactly on the upper grid point:
 if sum(t==tGrid(end))>0
-    x(:,t==tGrid(end)) = xGrid(:,end);
+    % Bug for length(t == tGrid(end)) > 1
+    % x(:,t==tGrid(end)) = xGrid(:,end);
+
+    % equivalent of t == tGrid(end)
+    t_idx = find(t == tGrid(end));
+    
+    % assign xGrid(:, end) for every idx
+    for j = 1:length(t_idx)
+        x(:, t_idx(j)) = xGrid(:,end);
+    end
 end
 
 end
@@ -251,6 +260,3 @@ fDel = (0.5/h)*(fUpp-fLow);
 x = delta.*(delta.*fDel + fLow) + xLow;
 
 end
-
-
-
