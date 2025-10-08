@@ -1,4 +1,4 @@
-function soln = trapezoid(problem)
+function soln = trapezoid(problem, options)
 % soln = trapezoid(problem)
 %
 % This function transcribes a trajectory optimization problem using the
@@ -55,6 +55,13 @@ function soln = trapezoid(problem)
 %   in the struct: soln.info.sparsityPattern. View it using spy().
 %
 
+% Add Options
+arguments
+    problem;
+    options.enable_quadrature = true;
+    options.quadTol = 1e-12;
+end
+
 % Print out some solver info if desired:
 nGrid = problem.options.trapezoid.nGrid;
 if problem.options.verbose > 0
@@ -94,14 +101,19 @@ soln.interp.collCst = @(t)( ...
 absColErr = @(t)(abs(soln.interp.collCst(t)));
 nSegment = nGrid-1;
 nState = size(xSoln,1);
-quadTol = 1e-12;   %Compute quadrature to this tolerance  
 soln.info.error = zeros(nState,nSegment);
-for i=1:nSegment
-    disp(i)
-    soln.info.error(:,i) = rombergQuadrature(absColErr,tSoln([i,i+1]),quadTol);
+if options.enable_quadrature
+    disp("Romberg Quadrature:");
+    for i=1:nSegment
+        disp(i)
+        soln.info.error(:,i) = rombergQuadrature(absColErr,tSoln([i,i+1]), options.quadTol);
+    end
+else
+    disp("Quadrature disabled. Information on the error solution is not valid.")
 end
-soln.info.maxError = max(max(soln.info.error));
 
+% If quadrature is not enabled, maxError = 0
+soln.info.maxError = max(max(soln.info.error));
 end
 
 

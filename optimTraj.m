@@ -1,4 +1,4 @@
-function soln = optimTraj(problem)
+function soln = optimTraj(problem, options)
 % soln = optimTraj(problem)
 %
 % Solves a trajectory optimization problem.
@@ -155,6 +155,13 @@ function soln = optimTraj(problem)
 %   soln.info.error.
 %
 
+% Add options
+arguments
+    problem;
+    options.enable_quadrature = true;
+    options.quadTol = 1e-12;
+end
+
 problem = inputValidation(problem);   %Check inputs
 problem = getDefaultOptions(problem); % Complete options struct
 
@@ -177,7 +184,7 @@ for iter=1:nIter
     %%%% This is the key part: call the underlying transcription method:
     switch P.options.method
         case 'trapezoid'
-            soln(iter) = trapezoid(P);
+            soln(iter) = trapezoid(P, "enable_quadrature", options.enable_quadrature, "quadTol", options.quadTol);
         case 'hermiteSimpson'
             soln(iter) = hermiteSimpson(P);
         case 'chebyshev'
