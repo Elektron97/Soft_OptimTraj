@@ -89,7 +89,8 @@ P.Aineq = []; P.bineq = [];
 P.Aeq = []; P.beq = [];
 P.options = Opt.nlpOpt;
 % P.solver = "fmincon";
-P.solver = "ipopt";
+% P.solver = "ipopt";
+P.solver = problem.solver;
 
 %%%% Call fmincon to solve the non-linear program (NLP)
 tic;
