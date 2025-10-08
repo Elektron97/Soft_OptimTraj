@@ -88,11 +88,31 @@ P.ub = zUpp;
 P.Aineq = []; P.bineq = [];
 P.Aeq = []; P.beq = [];
 P.options = Opt.nlpOpt;
-P.solver = 'fmincon';
+% P.solver = "fmincon";
+P.solver = "ipopt";
 
 %%%% Call fmincon to solve the non-linear program (NLP)
 tic;
-[zSoln, objVal,exitFlag,output] = fmincon(P);
+if P.solver == "fmincon"
+    [zSoln, objVal,exitFlag,output] = fmincon(P);
+elseif P.solver == "ipopt"
+    % Load ipopt interface
+    addpath(fullfile("..", "MPC_GVS", "custom_solvers"))
+    % mexIpopt
+    ipopt_opts.ipopt.jac_d_constant   = 'no';
+    ipopt_opts.ipopt.hessian_constant = 'no';
+    ipopt_opts.ipopt.hessian_approximation = 'limited-memory';
+    ipopt_opts.ipopt.limited_memory_update_type = 'bfgs' ; % {bfgs}, sr1 = 6; % {6}
+    ipopt_opts.ipopt.print_level = 5;
+    ipopt_opts.ipopt.max_iter    = 1.0e+3;
+    ipopt_opts.ipopt.mu_strategy = 'adaptive'; 
+    ipopt_opts.ipopt.linear_solver = 'mumps';
+
+    % Solver Handle
+    solver_handle = @(fun,z0,A,b,Aeq,beq,lb,ub,nonlcon) ipoptSolver(fun,z0,A,b,Aeq,beq,lb,ub,nonlcon, ipopt_opts);
+    [zSoln, objVal, exitFlag] = solver_handle(P.objective, P.x0, P.Aineq, P.bineq, P.Aeq, P.beq, P.lb, P.ub, P.nonlcon);
+    output = NaN;
+end
 [tSoln,xSoln,uSoln] = unPackDecVar(zSoln,pack);
 nlpTime = toc;
 
@@ -105,7 +125,10 @@ soln.grid.control = uSoln;
 soln.interp.state = @(t)( interp1(tSoln',xSoln',t','linear',nan)' );
 soln.interp.control = @(t)( interp1(tSoln',uSoln',t','linear',nan)' );
 
-soln.info = output;
+if ~isnan(output)
+    soln.info = output;
+end
+
 soln.info.nlpTime = nlpTime;
 soln.info.exitFlag = exitFlag;
 soln.info.objVal = objVal;
