@@ -88,8 +88,11 @@ P.ub = zUpp;
 P.Aineq = []; P.bineq = [];
 P.Aeq = []; P.beq = [];
 P.options = Opt.nlpOpt;
-% P.solver = "fmincon";
-% P.solver = "ipopt";
+
+% Enable Feasible Modeù
+P.options.EnableFeasibilityMode = true;
+P.options.SubproblemAlgorithm = 'cg';
+
 P.solver = problem.solver;
 
 %%%% Call fmincon to solve the non-linear program (NLP)
