@@ -89,12 +89,12 @@ P.Aineq = []; P.bineq = [];
 P.Aeq = []; P.beq = [];
 P.options = Opt.nlpOpt;
 
-% Enable Feasible Mode
-P.options.EnableFeasibilityMode = true;
-P.options.SubproblemAlgorithm = 'cg';
-
-% Max Iterations
-P.options.MaxIter = 5e+3;
+% % Enable Feasible Mode
+% P.options.EnableFeasibilityMode = true;
+% P.options.SubproblemAlgorithm = 'cg';
+% 
+% % Max Iterations
+% P.options.MaxIter = 5e+3;
 
 P.solver = problem.solver;
 
